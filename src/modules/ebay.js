@@ -1,25 +1,32 @@
 import ebay from 'ebay-api';
 
 function searchEbay(req, res){
-  const settings = {
-      'SEARCH_INDEX' : [req.query.item],
-      'MAX_PRICE': req.query.max_price,
-      'FREE_SHIPPING': req.query.free_shipping
+  const { item, max_price, free_shipping } = req.query;
+  const ebayResults = {};
+
+  if (!item) {
+    return res.json({ sucess: false, error: 'No search item' });
   }
 
+  const settings = {
+      searchIndex : [item],
+      maxPrice: max_price,
+      freeShipping: free_shipping,
+  };
+
   const params = {
-    keywords: settings['SEARCH_INDEX'],
+    keywords: settings.searchIndex,
     outputSelector: ['AspectHistogram'],
     paginationInput: {
-      entriesPerPage: 10
+      entriesPerPage: 10,
     },
     itemFilter: [
-      { name: 'FreeShippingOnly', value: settings['FREE_SHIPPING'] },
-      { name: 'MaxPrice', value: settings['MAX_PRICE'] }
+      { name: 'FreeShippingOnly', value: settings.freeShipping },
+      { name: 'MaxPrice', value: settings.maxPrice },
     ],
   };
 
-  const getItems = new Promise((resolve, reject) => {
+  new Promise((resolve, reject) => {
     ebay.xmlRequest({
       serviceName: 'Finding',
       opType: 'findItemsByKeywords',
@@ -33,12 +40,9 @@ function searchEbay(req, res){
     });
   })
   .then((response) => {
-    const ret = {
-      ebay: {},
-    };
     if (response && response.searchResult) {
-      ret.ebay.count = response.searchResult['$'].count
-      ret.ebay.items = response.searchResult.item.map((item) => ({
+      ebayResults.count = response.searchResult['$'].count;
+      ebayResults.items = response.searchResult.item.map((item) => ({
         id: item.id,
         title: item.title,
         galleryURL: item.galleryURL,
@@ -58,12 +62,11 @@ function searchEbay(req, res){
         price: item.sellingStatus.currentPrice.amount,
         currency: item.sellingStatus.currentPrice.currencyId,
       }));
-      ret.success = true;
-      res.json(ret);
-    } else {
-      res.json({ sucess: false, error: 'No data returned' });
+      return { ebay: ebayResults, success: true };
     }
+    return { sucess: false, error: 'No data returned' };
   })
+  .then((data) => res.json(data))
   .catch((error) => console.log('...ERROR'));
 }
 
