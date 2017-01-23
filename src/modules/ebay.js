@@ -1,11 +1,11 @@
 import ebay from 'ebay-api';
 
-function searchEbay(req, res){
-  const { item, max_price, free_shipping } = req.query;
+function searchEbay(query){
+  const { item, max_price, free_shipping } = query;
   const ebayResults = {};
 
   if (!item) {
-    return res.json({ sucess: false, error: 'No search item' });
+    return Promise.resolve({ sucess: false, error: 'No search item' });
   }
 
   const settings = {
@@ -26,7 +26,7 @@ function searchEbay(req, res){
     ],
   };
 
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     ebay.xmlRequest({
       serviceName: 'Finding',
       opType: 'findItemsByKeywords',
@@ -65,11 +65,7 @@ function searchEbay(req, res){
       return { ebay: ebayResults, success: true };
     }
     return { sucess: false, error: 'No data returned' };
-  })
-  .then((data) => res.json(data))
-  .catch((error) => console.log('...ERROR'));
+  });
 }
 
-module.exports = {
-  'searchEbay': searchEbay
-}
+export default searchEbay;
