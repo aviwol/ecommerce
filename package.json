@@ -14,10 +14,16 @@
   "license": "ISC",
   "dependencies": {
     "amazon-product-api": "^0.4.2",
+    "bootstrap": "^4.0.0-alpha.6",
     "dotenv": "^4.0.0",
     "ebay-api": "^1.13.1",
     "express": "^4.14.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "react": "^15.4.2",
+    "react-addons-css-transition-group": "^15.4.2",
+    "react-addons-transition-group": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "reactstrap": "^4.0.1"
   },
   "devDependencies": {
     "async": "^2.1.4",
